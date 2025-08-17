@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registration Test</h1>
+    <p>This page tests the registration functionality directly in the browser.</p>
+    
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role">
+                <option value="customer">Customer</option>
+                <option value="sales_agent">Sales Agent</option>
+                <option value="technician">Technician</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        
+        <button type="submit">Register</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value
+            };
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Processing registration...';
+            resultDiv.className = 'result';
+            
+            try {
+                // Try to connect to the backend server first
+                const response = await fetch('http://localhost:3001/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `✅ Registration Successful!\n\nUser ID: ${data.data.user.id}\nName: ${data.data.user.firstName} ${data.data.user.lastName}\nEmail: ${data.data.user.email}\nRole: ${data.data.user.role}\nToken: ${data.data.token}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `❌ Registration Failed!\n\nError: ${data.error.message}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                // If backend is not available, simulate successful registration
+                console.log('Backend not available, simulating registration...');
+                
+                const simulatedUser = {
+                    id: Date.now().toString(),
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    role: formData.role,
+                    token: 'simulated-token-' + Date.now()
+                };
+                
+                resultDiv.innerHTML = `✅ Registration Successful! (Simulated)\n\nUser ID: ${simulatedUser.id}\nName: ${simulatedUser.firstName} ${simulatedUser.lastName}\nEmail: ${simulatedUser.email}\nRole: ${simulatedUser.role}\nToken: ${simulatedUser.token}\n\nNote: This is a simulated response since the backend server is not running.`;
+                resultDiv.className = 'result success';
+                
+                // Store in localStorage for testing
+                localStorage.setItem('registeredUser', JSON.stringify(simulatedUser));
+            }
+        });
+        
+        // Test the form with sample data
+        function fillSampleData() {
+            document.getElementById('firstName').value = 'John';
+            document.getElementById('lastName').value = 'Doe';
+            document.getElementById('email').value = 'john.doe@example.com';
+            document.getElementById('phone').value = '1234567890';
+            document.getElementById('password').value = 'Test123!@#';
+            document.getElementById('role').value = 'customer';
+        }
+        
+        // Add a button to fill sample data
+        const sampleButton = document.createElement('button');
+        sampleButton.textContent = 'Fill Sample Data';
+        sampleButton.onclick = fillSampleData;
+        sampleButton.style.marginLeft = '10px';
+        sampleButton.style.backgroundColor = '#28a745';
+        document.querySelector('button[type="submit"]').after(sampleButton);
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Login - SpeedMotors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .demo-credentials {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Demo Login - SpeedMotors</h1>
+    <p>This is a demo login page that works without a backend server.</p>
+    
+    <div class="demo-credentials">
+        <h3>Demo Credentials:</h3>
+        <p><strong>Email:</strong> demo@example.com</p>
+        <p><strong>Password:</strong> demo123</p>
+        <p><em>Or use any email/password combination for testing</em></p>
+    </div>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <button type="submit">Login</button>
+        <button type="button" onclick="fillDemoCredentials()" style="background-color: #28a745; margin-left: 10px;">Fill Demo Credentials</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        // Demo user data for testing
+        const demoUsers = [
+            {
+                email: 'demo@example.com',
+                password: 'demo123',
+                firstName: 'Demo',
+                lastName: 'User',
+                role: 'customer'
+            },
+            {
+                email: 'admin@example.com',
+                password: 'admin123',
+                firstName: 'Admin',
+                lastName: 'User',
+                role: 'admin'
+            },
+            {
+                email: 'sales@example.com',
+                password: 'sales123',
+                firstName: 'Sales',
+                lastName: 'Agent',
+                role: 'sales_agent'
+            }
+        ];
+
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'demo@example.com';
+            document.getElementById('password').value = 'demo123';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Processing login...';
+            resultDiv.className = 'result';
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check if credentials match any demo user
+            const user = demoUsers.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                // Simulate successful login
+                const token = 'demo-token-' + Date.now();
+                const userData = {
+                    id: 'user-' + Date.now(),
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    role: user.role,
+                    isEmailVerified: true
+                };
+                
+                // Store in localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(userData));
+                
+                resultDiv.innerHTML = `✅ Login Successful!\n\nWelcome ${user.firstName} ${user.lastName}!\n\nUser ID: ${userData.id}\nEmail: ${user.email}\nRole: ${user.role}\nToken: ${token}\n\nYou can now access the main application.`;
+                resultDiv.className = 'result success';
+                
+                // Redirect to main app after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000';
+                }, 2000);
+                
+            } else {
+                // Check if it's a new user (any email/password combination)
+                if (email && password) {
+                    // Create a new demo user
+                    const newUser = {
+                        id: 'new-user-' + Date.now(),
+                        firstName: email.split('@')[0],
+                        lastName: 'User',
+                        email: email,
+                        role: 'customer',
+                        isEmailVerified: true
+                    };
+                    
+                    const token = 'new-token-' + Date.now();
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(newUser));
+                    
+                    resultDiv.innerHTML = `✅ Login Successful! (New User)\n\nWelcome ${newUser.firstName} ${newUser.lastName}!\n\nUser ID: ${newUser.id}\nEmail: ${email}\nRole: ${newUser.role}\nToken: ${token}\n\nThis is a demo account created for testing.`;
+                    resultDiv.className = 'result success';
+                    
+                    // Redirect to main app after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:3000';
+                    }, 2000);
+                    
+                } else {
+                    resultDiv.innerHTML = `❌ Login Failed!\n\nPlease enter both email and password.`;
+                    resultDiv.className = 'result error';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
